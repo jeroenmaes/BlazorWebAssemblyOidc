@@ -14,26 +14,17 @@
     }
 </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
 
-<p>UserInfo Endpoint response:</p>
+<p>Secure remote API call response:</p>
 
 @stringResponse
 
-<p>Secure remote API call response:</p>
 
-@stringResponse2
-
-
-@code {
+@code {    
     string stringResponse;
-    string stringResponse2;
     protected override async Task OnInitializedAsync()
-    {
+    {        
         var client = Http.CreateClient("secured-api");
-
-        var response = await client.GetAsync("/realms/master/protocol/openid-connect/userinfo");
+        var response = await client.GetAsync("/test");
         stringResponse = await response.Content.ReadAsStringAsync();
-
-        var response2 = await client.GetAsync("http://localhost:5128/test");
-        stringResponse2 = await response2.Content.ReadAsStringAsync();
     }
 }

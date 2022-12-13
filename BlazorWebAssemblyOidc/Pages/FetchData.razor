@@ -9,13 +9,11 @@
 @stringResponse
 
 @code {
-
     string stringResponse;
     protected override async Task OnInitializedAsync()
     {
         var client = Http.CreateClient("api");
-        var response = await client.GetAsync("http://localhost:5128/ping");
+        var response = await client.GetAsync("/ping");
         stringResponse = await response.Content.ReadAsStringAsync();
     }
-
 }

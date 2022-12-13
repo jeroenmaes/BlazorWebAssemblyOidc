@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
@@ -14,16 +15,16 @@ namespace BlazorWebAssemblyOidc
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
+            
+            string backendApi = builder.Configuration["BackendApi"];
 
             builder.Services.AddScoped<CustomAuthenticationMessageHandler>();
-
-            string authorityUrl = builder.Configuration["security:authority"];
-
-            builder.Services.AddHttpClient("secured-api", opt => opt.BaseAddress = new Uri(authorityUrl))
+                        
+            builder.Services.AddHttpClient("secured-api", opt => opt.BaseAddress = new Uri(backendApi))
                 .AddHttpMessageHandler<CustomAuthenticationMessageHandler>();
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("secured-api"));
 
-            builder.Services.AddHttpClient("api");
-
+            builder.Services.AddHttpClient("api", opt => opt.BaseAddress = new Uri(backendApi));
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("api"));
 
             builder.Services.AddOidcAuthentication(opt =>
@@ -33,17 +34,19 @@ namespace BlazorWebAssemblyOidc
                 opt.ProviderOptions.ResponseType = "code";
                 opt.ProviderOptions.DefaultScopes.Add("api");
                 opt.ProviderOptions.DefaultScopes.Add("email");
-                opt.ProviderOptions.DefaultScopes.Add("profile");                
+                opt.ProviderOptions.DefaultScopes.Add("profile");
             });
 
             await builder.Build().RunAsync();
         }
     }
+
     public class CustomAuthenticationMessageHandler : AuthorizationMessageHandler
-    {        
-        public CustomAuthenticationMessageHandler(IAccessTokenProvider provider, NavigationManager nav) : base(provider, nav)
+    {
+        public CustomAuthenticationMessageHandler(IAccessTokenProvider provider, NavigationManager nav, IConfiguration config) : base(provider, nav)
         {
-            ConfigureHandler(new string[] { "http://localhost:8080/realms/master/", "http://localhost:5128/" });
+            string backendApi = config["BackendApi"];
+            ConfigureHandler(new string[] { backendApi });
         }
     }
 }

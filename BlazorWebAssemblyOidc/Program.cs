@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorWebAssemblyOidc
@@ -21,8 +17,12 @@ namespace BlazorWebAssemblyOidc
 
             builder.Services.AddScoped<CustomAuthenticationMessageHandler>();
 
-            builder.Services.AddHttpClient("api", opt => opt.BaseAddress = new Uri("http://localhost:8080/realms/master/"))
+            string authorityUrl = builder.Configuration["security:authority"];
+
+            builder.Services.AddHttpClient("secured-api", opt => opt.BaseAddress = new Uri(authorityUrl))
                 .AddHttpMessageHandler<CustomAuthenticationMessageHandler>();
+
+            builder.Services.AddHttpClient("api");
 
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("api"));
 
@@ -36,13 +36,12 @@ namespace BlazorWebAssemblyOidc
                 opt.ProviderOptions.DefaultScopes.Add("profile");                
             });
 
-
             await builder.Build().RunAsync();
         }
     }
     public class CustomAuthenticationMessageHandler : AuthorizationMessageHandler
-    {
-        public CustomAuthenticationMessageHandler(IAccessTokenProvider provder, NavigationManager nav) : base(provder, nav)
+    {        
+        public CustomAuthenticationMessageHandler(IAccessTokenProvider provider, NavigationManager nav) : base(provider, nav)
         {
             ConfigureHandler(new string[] { "http://localhost:8080/realms/master/", "http://localhost:5128/" });
         }

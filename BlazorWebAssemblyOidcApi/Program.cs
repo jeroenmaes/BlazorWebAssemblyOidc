@@ -28,9 +28,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
          c.IncludeErrorDetails = true;
          c.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
          {
-             ValidateAudience = false,
-             //TODO: Fix Audience Validation
-             //ValidAudience = builder.Configuration["security:clientid"],
+             ValidAudience = builder.Configuration["security:clientid"],
              ValidIssuer = builder.Configuration["security:authority"]
      };
          c.RequireHttpsMetadata = false;

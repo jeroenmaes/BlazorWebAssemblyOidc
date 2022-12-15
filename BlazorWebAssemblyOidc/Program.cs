@@ -33,10 +33,10 @@ namespace BlazorWebAssemblyOidc
             {                
                 opt.ProviderOptions.Authority = builder.Configuration["security:authority"];
                 opt.ProviderOptions.ClientId = builder.Configuration["security:clientid"];
-                opt.ProviderOptions.ResponseType = "code";
-                opt.ProviderOptions.DefaultScopes.Add("api");
+                opt.ProviderOptions.ResponseType = "code";                
                 opt.ProviderOptions.DefaultScopes.Add("email");
                 opt.ProviderOptions.DefaultScopes.Add("profile");
+                opt.ProviderOptions.DefaultScopes.Add("api_access");
             });
 
             await builder.Build().RunAsync();
